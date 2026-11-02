@@ -24,7 +24,26 @@ public class DisjointSetTest {
         check(d.count() == 3, "3 sets: {0,1,2,3} {4} {5}");
         check(d.find(4) == 4 && d.find(5) == 5, "a single cell is its own root");
 
-        // TODO: add your own checks here
+        // my own checks
+        DisjointSet big = new DisjointSet(1_000_000);
+        for (int i = 0; i + 1 < 1_000_000; i++) big.union(i, i + 1);   // one long chain
+        check(big.count() == 1, "a chain of 1,000,000 unions gives one set");
+        check(big.connected(0, 999_999), "the ends of the long chain are connected (no stack overflow)");
+
+        DisjointSet e = new DisjointSet(4);
+        check(!e.union(2, 2), "union of a cell with itself returns false");
+        check(e.count() == 4, "count does not change after union(2, 2)");
+        check(e.connected(3, 3), "a cell is connected to itself");
+
+        DisjointSet c = new DisjointSet(10);
+        int joined = 0;
+        for (int i = 0; i < 9; i++) if (c.union(i, (i * 7 + 3) % 10)) joined++;
+        check(c.count() == 10 - joined, "count = n - number of successful unions");
+
+        DisjointSet s = new DisjointSet(8);
+        s.union(0, 1); s.union(2, 3); s.union(4, 5); s.union(0, 2); s.union(0, 4);
+        check(s.find(1) == s.find(5) && s.find(3) == s.find(4), "unions of unions end in one root");
+        check(!s.connected(0, 6) && !s.connected(6, 7), "untouched cells stay apart");
 
         System.out.println(failed == 0 ? "All checks passed." : failed + " checks failed.");
     }
